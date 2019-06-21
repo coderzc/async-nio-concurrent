@@ -1,4 +1,4 @@
-package com.zc.nettystu;
+package com.zc.nettystu.socket_demo;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,9 +13,10 @@ import java.util.Set;
 /**
  * @author: zhaocong
  */
-public class NioServerDemo {
+public class NioSocketServer {
 
     private static ByteBuffer writeBuffer = ByteBuffer.allocateDirect(1024);
+    private static ByteBuffer readBuffer = ByteBuffer.allocateDirect(5);
     private static Selector selector;
     private static StringBuffer message = new StringBuffer();
 
@@ -93,7 +94,7 @@ public class NioServerDemo {
                     SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
 
                     // 读取channel中数据
-                    ByteBuffer readBuffer = ByteBuffer.allocateDirect(5);
+                    readBuffer.clear();
                     int read = 0;
                     while ((read = socketChannel.read(readBuffer)) > 0){// 循环读取缓冲区数据，直到把缓冲区读空，防止频繁调用select()，要配合非阻塞channel才会发挥最大性能
                         readBuffer.flip();
