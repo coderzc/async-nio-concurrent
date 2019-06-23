@@ -17,7 +17,7 @@ public class BioSocketServer {
 
         ServerSocket serverSocket = new ServerSocket(9000);
 
-        System.out.println("服务端已启动，等待客户端连接..");
+        System.out.println("服务端已启动端口：9000,等待客户端连接..");
 
         while (true){
 
@@ -39,6 +39,9 @@ public class BioSocketServer {
                         StringBuilder message = new StringBuilder();
                         String messageStr = null;
                         while ((readLength = bis.read(buffer, 0, buffer.length)) != -1) {
+                            if(readLength==0){ // 阻塞读readLength不可能为0
+                                System.out.println("00000");
+                            }
                             String chunk = new String(buffer, 0, readLength, "UTF-8");
                             System.out.println(chunk);
                             message.append(chunk);

@@ -6,13 +6,12 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 
 /**
  * Created by zhaocong on 2019-06-20
  */
-public class IOTest {
+public class IOBitOpt {
 
     private static int bufferSize = 536870912; // 512m
 
@@ -124,7 +123,7 @@ public class IOTest {
         channel.close();
     }
 
-//    @Test
+//    @BitOpt
 //    public void testReadAllByte() throws IOException {
 //        Files.readAllBytes(file.toPath());
 //    }
@@ -186,7 +185,7 @@ public class IOTest {
 
     public static void main(String[] args) throws Exception {
         long start = System.nanoTime();
-        IOTest ioTest = new IOTest();
+        IOBitOpt ioTest = new IOBitOpt();
 
 //        ioTest.testInputSteam();
 //
