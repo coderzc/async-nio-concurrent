@@ -1,17 +1,15 @@
 package com.zc.nettystu.socket_demo;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.nio.ByteBuffer;
-import java.nio.channels.*;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.Scanner;
 import java.util.Set;
 
 /**
@@ -125,7 +123,7 @@ public class NioSocketServer {
                 if (message.indexOf("\n") >= 0) {
                     System.out.print("receiveData --->" + "\033[36;4m"+message+"\033[0m");
 
-                    // 把读到的数据绑定到key中
+                    // 把要写的的数据绑定到key中
                     selectionKey.attach("server message echo:" + "已经收到\n");
                     // 注册写事件
                     selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
@@ -149,7 +147,7 @@ public class NioSocketServer {
 
             //非阻塞模式下，read==0代表当前系统缓冲区已经空了
             if (read == 0) {
-                System.out.println("000,接受缓冲区已经读完了---->"+"hasRemaining:" + readBuffer.hasRemaining() +"\n");
+                System.out.println("000,接受缓冲区已经读完了\n");
             }
 
 

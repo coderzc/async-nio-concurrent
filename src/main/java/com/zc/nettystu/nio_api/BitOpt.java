@@ -3,6 +3,7 @@ package com.zc.nettystu.nio_api;
 import java.nio.channels.SelectionKey;
 
 /**
+ * 位运算
  * @author: zhaocong
  */
 public class BitOpt {

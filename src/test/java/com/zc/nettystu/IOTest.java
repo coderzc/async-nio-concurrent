@@ -11,17 +11,20 @@ import java.nio.file.StandardOpenOption;
 /**
  * Created by zhaocong on 2019-06-20
  */
-public class IOBitOpt {
+public class IOTest {
 
     private static int bufferSize = 536870912; // 512m
 
-    private static File file = new File("/Users/zc/netty7.zip");
+    private static String usrHome = System.getProperty("user.home");
+
+
+    private static File file = new File(usrHome+"/netty7.zip");
 
     private static RandomAccessFile raf;
 
     static {
         try {
-            raf = new RandomAccessFile("/Users/zc/netty7.zip", "rw");
+            raf = new RandomAccessFile(usrHome+"/netty7.zip", "rw");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -185,15 +188,15 @@ public class IOBitOpt {
 
     public static void main(String[] args) throws Exception {
         long start = System.nanoTime();
-        IOBitOpt ioTest = new IOBitOpt();
+        IOTest ioTest = new IOTest();
 
 //        ioTest.testInputSteam();
 //
-//        ioTest.testBufferInputSteam();
+        ioTest.testBufferInputSteam();
 
 //        ioTest.testByteBuffer();
 
-        ioTest.testMMAP();
+//        ioTest.testMMAP();
         long end = System.nanoTime();
         System.out.println("StreamFileReader: " + (end - start));
     }
