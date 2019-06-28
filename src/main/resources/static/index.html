@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.bootcss.com/axios/0.19.0/axios.min.js"></script>
 </head>
 <body>
 <div>发送消息：</div>
@@ -20,7 +20,10 @@
 
 <script type="application/javascript">
 
-    const webSocketUrl = "ws://127.0.0.1:8088/chat";
+    // 当前URL的主机名 (前端服务器主机地址)
+    const FE_SERVER_HOST = document.location.hostname;
+
+    const webSocketUrl = "ws://"+FE_SERVER_HOST+":8088/chat";
     window.CHAT = {
         websocket: null,
         init: () => {
@@ -59,17 +62,20 @@
 
     function fetch_send() {
         fetch("/api_8080/testJsonView", {
-                method: 'get',
-                headers: {
-                    'Content-Type': 'application/json'}
-            }).then(data => {
+            method: 'get',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then((response) => {
+            // 解析响应数据body
+            return response.json()
+        }).then((data) => {
             console.log(data)
-            }).catch(err => {
-                    console.error(err)
-            })
+        }).catch(err => {
+            console.error(err)
+        })
     }
 
-    axios.defaults.withCredentials=true;
     function axios_send() {
         axios({
             method: 'get',
@@ -78,9 +84,9 @@
                 'Content-Type': 'application/json'
             }
         }).then(function (response) {
-            console.log(response);
+            console.log(response.data);
         }).catch(function (error) {
-                console.log(error);
+            console.log(error);
         });
     }
 
