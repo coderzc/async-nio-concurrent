@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div>发送消息：</div>
+<input type="text" id="sendContent">
+<input type="button" value="发送" onclick="CHAT.chat()">
+
+
+<div>接受消息：</div>
+<div id="receiveMsg" style="background-color: gainsboro"></div>
+
+
+<input type="button" value="fetch发送" onclick="fetch_send()">
+<input type="button" value="axios发送" onclick="axios_send()">
+
+<script type="application/javascript">
+
+    const webSocketUrl = "ws://127.0.0.1:8088/chat";
+    window.CHAT = {
+        websocket: null,
+        init: () => {
+            if (window.WebSocket) {
+                CHAT.websocket = new WebSocket(webSocketUrl);
+
+                CHAT.websocket.onopen = () => {
+                    console.log("WS 连接建立成功")
+                };
+                CHAT.websocket.onclose = () => {
+                    console.log("WS 连接关闭")
+                };
+                CHAT.websocket.onerror = err => {
+                    console.error("WS 发生错误", err)
+                };
+                CHAT.websocket.onmessage = response => {
+                    console.log("WS 收到消息" + response.data);
+                    let receiveMsg = document.getElementById("receiveMsg");
+                    receiveMsg.innerHTML += "<span>" + response.data + "</span><br/>";
+                };
+
+            } else {
+                alert("浏览器不支持WebSocket协议...")
+            }
+        },
+        chat() {
+            let sendContent = document.getElementById("sendContent");
+            CHAT.websocket.send(sendContent.value);
+            sendContent.value = "";
+        }
+    };
+
+    // 初始化连接
+    CHAT.init();
+
+
+    function fetch_send() {
+        fetch("/api_8080/testJsonView", {
+                method: 'get',
+                headers: {
+                    'Content-Type': 'application/json'}
+            }).then(data => {
+            console.log(data)
+            }).catch(err => {
+                    console.error(err)
+            })
+    }
+
+    axios.defaults.withCredentials=true;
+    function axios_send() {
+        axios({
+            method: 'get',
+            url: '/api_8080/testJsonView',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(function (response) {
+            console.log(response);
+        }).catch(function (error) {
+                console.log(error);
+        });
+    }
+
+
+</script>
+</body>
+</html>

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
+import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -58,7 +59,7 @@ public class NioSocketClient {
             socketChannel.configureBlocking(false);
 
             //连接主机
-            boolean connect = socketChannel.connect(new InetSocketAddress("127.0.0.1", 8888));
+            boolean connect = socketChannel.connect(new InetSocketAddress("127.0.0.1", 8099));
 
             //注册事件
             /* TODO 唤醒select
@@ -234,9 +235,17 @@ public class NioSocketClient {
             //写模式切换到读模式 ---> position归零、limit为之前的position的值
             sendBuffer.flip();
             while (sendBuffer.hasRemaining()) {
+
+                // 复制ByteBuffer
+//                ByteBuffer duplicate = sendBuffer.duplicate();
+
                 int writed = socketChannel.write(sendBuffer);
                 System.out.println("writed byte is：" + writed);
-
+//                if(Charset.forName("UTF-8").decode(duplicate).toString().contains("O")){
+//                    socketChannel.setOption(StandardSocketOptions.SO_LINGER,0);
+//                    System.out.println("SO_LINGER");
+//                    System.exit(0);
+//                }
                 if(writed<=0){
                     sysFull = true;
                     // 系统发送缓存已经满了

@@ -33,8 +33,8 @@ public class NioSocketServer {
             // 把serverSocketChannel 变成非阻塞模式（accept非阻塞）
             serverSocketChannel.configureBlocking(false);
             // bind()、listen()
-            serverSocketChannel.bind(new InetSocketAddress(8888));
-            System.out.println("listening on port 8888");
+            serverSocketChannel.bind(new InetSocketAddress(8099));
+            System.out.println("listening on port 8099");
 
             // 创建多路io复用器【select/poll/epoll】
             // 相当于 epoll_create() 创建epoll的根结点 selector
