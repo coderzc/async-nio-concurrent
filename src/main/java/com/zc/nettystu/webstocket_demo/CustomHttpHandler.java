@@ -25,8 +25,6 @@ public class CustomHttpHandler extends SimpleChannelInboundHandler<HttpRequest> 
             clientIP = insocket.getAddress().getHostAddress();
         }
 
-        System.out.println(clientIP);
-
         // 把客户端ip放入channel上下文
         if (channelAttr.get() == null) {
             channelAttr.set(clientIP);
