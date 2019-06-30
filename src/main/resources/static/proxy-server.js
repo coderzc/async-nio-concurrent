@@ -1,25 +1,37 @@
-//引入http，模块
-var http = require('http');
-//引入url模块 解析请求的url
-var url = require('url');
-//引入IO文件模块 操作文件
-var fs = require('fs');
+var http = require('http'); //用来启服务
+var fs = require('fs'); //用来读取文件
+var root = __dirname;//你本地放index.html页面的文件路径
 
-//创建server 并指定服务器请求响应函数
-http.createServer(function (req, res) {
-    var pathname = url.parse(req.url).pathname;
-    if (pathname == '/') {
+//开启服务
+var server = http.createServer(function (req, res) {
+    var url = req.url;
+    if (url === '/') {
         //请求 index.html 返回请求状态为200
-        var data = fs.readFileSync('./index.html').toString();//读取文件内容并转换为字符串
+        var data = fs.readFileSync(root + '/index.html').toString();//读取文件内容并转换为字符串
         res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
         res.end(data);
+    } else if (url === '/favicon.ico') {
+        var icon = fs.readFileSync(root + '/favicon.ico');
+        res.writeHead(200, {'Content-Type': 'image/x-icon'});
+        res.end(icon)
     } else {
-        console.log('hello world');
-        //不是请求 index.html 返回请求状态为404
-        res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
-        res.end('hello world');
+        var file = root + url;
+        fs.readFile(file, function (err, data) {
+            if (err) {
+                res.writeHeader(404, {
+                    'content-type': 'text/html;charset="utf-8"'
+                });
+                // res.write();
+                res.end('<h1>404错误</h1><p>你要找的页面不存在1</p>');
+            } else {
+                res.writeHeader(200, {
+                    'content-type': 'text/html;charset="utf-8"'
+                });
+                // res.write();
+                res.end(data);
+
+            }
+        })
     }
-})
-//指定服务器监听的端口
-    .listen(3000);
+}).listen(3000); //端口号
 console.log('服务器开启在：http://localhost:3000/');

@@ -9,7 +9,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 /**
  * Created by zhaocong on 2019-06-12
  */
-public class HelloNetty {
+public class NettyServer {
 
     public static void main(String[] args) throws InterruptedException {
 
