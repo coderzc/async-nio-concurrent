@@ -32,7 +32,7 @@ public class CustomHandler extends SimpleChannelInboundHandler<HttpObject> {
             logger.info("remoteAddress:" + channel.remoteAddress().toString());
 
             // 定义发送数据消息并写入ByteBuf
-            ByteBuf content = Unpooled.copiedBuffer("hi netty~，你好 😂", CharsetUtil.UTF_8);
+            ByteBuf content = Unpooled.copiedBuffer("hi io.netty~，你好 😂", CharsetUtil.UTF_8);
 
             // 构建一个http response
             FullHttpResponse response =

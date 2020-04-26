@@ -66,7 +66,7 @@ public class IOTest {
     }
 
 
-    @Test // 3s469ms  FileChannel+ByteBuffer
+    @Test // 3s469ms  FileChannel+HeapByteBuffer
     public void testByteBuffer() throws IOException {
 //        FileChannel channel = new FileInputStream(file).getChannel();
         FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.READ);
@@ -86,12 +86,16 @@ public class IOTest {
 
     @Test // 1s 193  FileChannel+DirectByteBuffer
     // 3s 374
-    public void testByteBufferDirec() throws IOException {
+    public void testByteBufferDirect() throws IOException {
         FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.READ);
 
         ByteBuffer buffer = ByteBuffer.allocateDirect(bufferSize);
 
-        while (channel.read(buffer) != -1) {
+        int bytes;
+        while ((bytes = channel.read(buffer)) != -1) {
+            byte[] data = new byte[bytes];
+            buffer.flip();
+            buffer.get(data);
             buffer.clear();
         }
 
@@ -105,7 +109,11 @@ public class IOTest {
 
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 
-        while (channel.read(buffer) != -1) {
+        int bytes;
+        while ((bytes = channel.read(buffer)) != -1) {
+            byte[] data = new byte[bytes];
+            buffer.flip();
+            buffer.get(data);
             buffer.clear();
         }
 
@@ -119,7 +127,11 @@ public class IOTest {
 
         ByteBuffer buffer = ByteBuffer.allocateDirect(bufferSize);
 
-        while (channel.read(buffer) != -1) {
+        int bytes;
+        while ((bytes = channel.read(buffer)) != -1) {
+            byte[] data = new byte[bytes];
+            buffer.flip();
+            buffer.get(data);
             buffer.clear();
         }
 
