@@ -1,5 +1,7 @@
 package com.zc.nettystu;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
@@ -13,22 +15,37 @@ import java.nio.file.StandardOpenOption;
  */
 public class IOTest {
 
+    private long start;
+
     private static int bufferSize = 536870912; // 512m
 
     private static String usrHome = System.getProperty("user.home");
 
 
-    private static File file = new File(usrHome+"/netty7.zip");
+    private static File file = new File(usrHome + "/netty7.zip");
 
     private static RandomAccessFile raf;
 
     static {
         try {
-            raf = new RandomAccessFile(usrHome+"/netty7.zip", "rw");
+            raf = new RandomAccessFile(usrHome + "/netty7.zip", "rw");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
+
+    @Before//在每个测试方法之前运行
+    public void Testbegin() {
+        start = System.currentTimeMillis();
+    }
+
+
+    @After//在每个方法之后运行
+    public void end() {
+        long end = System.currentTimeMillis();
+        System.out.println("StreamFileReader: " + (end - start) + "ms");
+    }
+
 
     @Test // 1s 402  InputSteam
     public void testInputSteam() throws IOException {
@@ -198,19 +215,9 @@ public class IOTest {
 
     }
 
-    public static void main(String[] args) throws Exception {
-        long start = System.nanoTime();
-        IOTest ioTest = new IOTest();
-
-//        ioTest.testInputSteam();
-//
-        ioTest.testBufferInputSteam();
-
-//        ioTest.testByteBuffer();
-
-//        ioTest.testMMAP();
-        long end = System.nanoTime();
-        System.out.println("StreamFileReader: " + (end - start));
+    @Test
+    public void test() {
+        System.out.println("123");
     }
 
 

@@ -35,14 +35,7 @@ public class CustomHandler extends SimpleChannelInboundHandler<HttpObject> {
             ByteBuf content = Unpooled.copiedBuffer("hi io.netty~，你好 😂", CharsetUtil.UTF_8);
 
             // 构建一个http response
-            FullHttpResponse response =
-                    new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-                            HttpResponseStatus.OK, content);
-
-            //设置响应头
-            response.headers()
-                    .add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.TEXT_PLAIN+";charset=UTF-8")
-                    .add(HttpHeaderNames.CONTENT_LENGTH, content.readableBytes());
+            FullHttpResponse response = getFullHttpResponse(content);
 
             // 向客户端channel写入消息
             ctx.writeAndFlush(response);
@@ -53,6 +46,19 @@ public class CustomHandler extends SimpleChannelInboundHandler<HttpObject> {
         if (msg instanceof HttpResponse) {
         }
 
+    }
+
+    // 构建一个http response
+    private FullHttpResponse getFullHttpResponse(ByteBuf content) {
+        FullHttpResponse response =
+                new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                        HttpResponseStatus.OK, content);
+
+        //设置响应头
+        response.headers()
+                .add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.TEXT_PLAIN + ";charset=UTF-8")
+                .add(HttpHeaderNames.CONTENT_LENGTH, content.readableBytes());
+        return response;
     }
 
     @Override

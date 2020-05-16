@@ -28,7 +28,7 @@ public class NettyStuApplication implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         try {
-//            wsServer.startServer();
+            wsServer.startServer();
             nettyServer.startServer();
         } catch (Exception e) {
             logger.error("NettyBoot error:", e);

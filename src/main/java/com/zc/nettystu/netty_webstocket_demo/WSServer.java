@@ -8,12 +8,12 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by zhaocong on 2019-06-27
  */
-@Component
+@Service
 public class WSServer {
 
     private EventLoopGroup mainGroup;
