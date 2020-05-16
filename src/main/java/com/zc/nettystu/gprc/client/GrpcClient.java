@@ -1,9 +1,9 @@
 package com.zc.nettystu.gprc.client;
 
 import com.alibaba.fastjson.JSON;
-import com.zc.protojava.routeguide.Feature;
-import com.zc.protojava.routeguide.Point;
-import com.zc.protojava.routeguide.RouteGuideGrpc;
+import com.zc.proto.routeguide.Feature;
+import com.zc.proto.routeguide.Point;
+import com.zc.proto.routeguide.RouteGuideGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.slf4j.Logger;
