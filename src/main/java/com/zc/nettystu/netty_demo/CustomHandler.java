@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 自定义助手类
- * Created by zhaocong on 2019-06-26
+ * Created by coderzc on 2019-06-26
  */
 public class CustomHandler extends SimpleChannelInboundHandler<HttpObject> {
 

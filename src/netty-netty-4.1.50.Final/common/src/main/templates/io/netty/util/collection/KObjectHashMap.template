@@ -258,7 +258,7 @@ public class @K@ObjectHashMap<V> implements @K@ObjectMap<V> {
             // 0 can be a valid key or unused slot, but won't impact the hashcode in either case.
             // This way we can use a cheap loop without conditionals, or hard-to-unroll operations,
             // or the devastatingly bad memory locality of visiting value objects.
-            // Also, it's important to use a hash function that does not depend on the ordering
+            // Also, it's important to use a hash mapFunction that does not depend on the ordering
             // of terms, only their values; since the map is an unordered collection and
             // entries can end up in different positions in different maps that have the same
             // elements, but with different history of puts/removes, due to conflicts.

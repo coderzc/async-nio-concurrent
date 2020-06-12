@@ -1,15 +1,24 @@
 package com.zc.nettystu.netty_demo;
 
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpServerCodec;
+import java.util.concurrent.ForkJoinPool;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpServerCodec;
 
 /**
  * Created by coderzc on 2019-06-12
@@ -28,6 +37,16 @@ public class NettyServer {
     EventLoopGroup bossGroup = new NioEventLoopGroup(1);
     // 从线程组，处理来自主线程组的任务 ----> reactor
     EventLoopGroup workGroup = new NioEventLoopGroup(10);
+    /**
+     * 1. 创建一个线程执行器
+     * new ThreadPerTaskExecutor(newDefaultThreadFactory());
+     *
+     * 2. 创建 NioEventLoop
+     * io.netty.channel.nio.NioEventLoop#NioEventLoop
+     *
+     * 3. 创建一个selector
+     * io.netty.channel.nio.NioEventLoop#openSelector()
+     */
 
     /**
      * 创建一个netty启动器,设置启动参数
@@ -65,7 +84,7 @@ public class NettyServer {
                     pipeline.addLast("HttpServerCodec",new HttpServerCodec());
 
                     // 添加自定义的handel
-                    pipeline.addLast("CustomHandel",new CustomHandler());
+                    pipeline.addLast("CustomHandler",new CustomHandler());
                 }
             });
 

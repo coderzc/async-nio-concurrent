@@ -535,7 +535,7 @@ public class @K@ObjectHashMapTest {
         assertFalse(map1.equals(map2));
         // Rebuild map2 with elements in a different order, again the maps should be equal.
         // (These tests with same elements in different order also show that the hashCode
-        // function does not depend on the internal ordering of entries.)
+        // mapFunction does not depend on the internal ordering of entries.)
         map2.clear();
         for (@O@ key : map1.keySet()) {
             map2.put(key, key);

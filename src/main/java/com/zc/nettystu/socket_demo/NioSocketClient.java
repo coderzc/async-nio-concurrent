@@ -13,7 +13,7 @@ import java.nio.charset.Charset;
 import java.util.Set;
 
 /**
- * @author: zhaocong
+ * @author: coderzc
  */
 public class NioSocketClient {
 

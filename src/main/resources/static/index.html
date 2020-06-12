@@ -55,7 +55,7 @@
 <!--<input type="button" value="axios发送" onclick="axios_send()">-->
 
 <script type="application/javascript">
-    function keydown() {
+    mapFunction keydown() {
         if (event.keyCode == 13) {
             CHAT.send();
         }
@@ -114,7 +114,7 @@
     CHAT.init();
 
 
-    function fetch_send() {
+    mapFunction fetch_send() {
         fetch("/api_8080/testJsonView", {
             method: 'get',
             headers: {
@@ -130,16 +130,16 @@
         })
     }
 
-    function axios_send() {
+    mapFunction axios_send() {
         axios({
             method: 'get',
             url: '/api_8080/testJsonView',
             headers: {
                 'Content-Type': 'application/json'
             }
-        }).then(function (response) {
+        }).then(mapFunction (response) {
             console.log(response.data);
-        }).catch(function (error) {
+        }).catch(mapFunction (error) {
             console.log(error);
         });
     }

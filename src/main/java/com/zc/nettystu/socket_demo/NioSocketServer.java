@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.Set;
 
 /**
- * @author: zhaocong
+ * @author: coderzc
  */
 public class NioSocketServer {
     private static Selector selector = null;
