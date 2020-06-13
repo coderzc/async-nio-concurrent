@@ -1,5 +1,7 @@
 package com.zc.nettystu.utils;
 
+import com.google.common.collect.Lists;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -10,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.BiFunction;
@@ -18,13 +19,17 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.collect.Lists;
-
 /**
  * @author coderzc
  * Created on 2020-06-12
  */
 public class MapReduceForkJoin {
+    private static ForkJoinPool pool = null;
+
+    static {
+        pool = new ForkJoinPool();
+    }
+
     protected static class MapReduceTask<T, V> extends RecursiveTask<V> {
         int maxCountRange = 0;// 最大计算范围
         List<T> data; // 数据源
@@ -35,7 +40,7 @@ public class MapReduceForkJoin {
 
 
         public MapReduceTask(List<T> data, int maxCountRange, Supplier<V> initResFunc, BiFunction<T, V, V> mapFunction,
-                BiFunction<V, V, V> reduceFunction) {
+                             BiFunction<V, V, V> reduceFunction) {
             this.maxCountRange = maxCountRange;
             this.startNum = 0;
             this.data = Collections.unmodifiableList(data);
@@ -46,8 +51,8 @@ public class MapReduceForkJoin {
         }
 
         public MapReduceTask(List<T> data, int maxCountRange, Supplier<V> initResFunc, BiFunction<T, V, V> mapFunction,
-                BiFunction<V, V, V> reduceFunction, int startNum,
-                int endNum) {
+                             BiFunction<V, V, V> reduceFunction, int startNum,
+                             int endNum) {
             this.data = Collections.unmodifiableList(data);
             this.maxCountRange = maxCountRange;
             this.startNum = startNum;
@@ -72,8 +77,7 @@ public class MapReduceForkJoin {
                                 this.reduceFunction,
                                 middle + 1, endNum);
                 //拆分后，执行fork
-                subMapReduceTask1.fork();
-                subMapReduceTask2.fork();
+                invokeAll(subMapReduceTask1, subMapReduceTask2);
 
                 // merge 结果
                 res = reduceFunction.apply(subMapReduceTask1.join(), res);
@@ -90,29 +94,24 @@ public class MapReduceForkJoin {
     /**
      * MapReduce 并行执行器
      *
-     * @param data 数据源
-     * @param mapCount 划分为多少个map
-     * @param initResFunc 结果初始化函数
-     * @param mapFunction map函数 T,V ---> V
+     * @param data           数据源
+     * @param mapCount       划分为多少个map
+     * @param initResFunc    结果初始化函数
+     * @param mapFunction    map函数 T,V ---> V
      * @param reduceFunction reduce函数 V,V ---> V
-     * @param <T> 输入数据类型
-     * @param <V> 返回结果类型
+     * @param <T>            输入数据类型
+     * @param <V>            返回结果类型
      */
     public static <T, V> V exec(List<T> data, int mapCount, Supplier<V> initResFunc,
-            BiFunction<T, V, V> mapFunction,
-            BiFunction<V, V, V> reduceFunction) {
+                                BiFunction<T, V, V> mapFunction,
+                                BiFunction<V, V, V> reduceFunction) {
         if (data == null) {
             return null;
         }
-        ForkJoinPool pool = new ForkJoinPool();
-        try {
-            int maxCountRange = (int) Math.ceil((double) data.size() / mapCount);
-            MapReduceTask<T, V> mapReduceTask =
-                    new MapReduceTask<>(data, maxCountRange, initResFunc, mapFunction, reduceFunction);
-            return pool.invoke(mapReduceTask);
-        } finally {
-            pool.shutdown();
-        }
+        int maxCountRange = (int) Math.ceil((double) data.size() / mapCount);
+        MapReduceTask<T, V> mapReduceTask =
+                new MapReduceTask<>(data, maxCountRange, initResFunc, mapFunction, reduceFunction);
+        return pool.invoke(mapReduceTask);
     }
 
 
@@ -158,18 +157,18 @@ public class MapReduceForkJoin {
         List<Integer> list = Stream.iterate(1, item -> item + 1).limit(n).collect(Collectors.toList());
 
         int mapCount = 10000;
-        System.out.println("mapCount: "+ mapCount+ "\n");
+        System.out.println("mapCount: " + mapCount + "\n");
 
-//        long startTime3 = System.currentTimeMillis();
-//        BigDecimal result3 = list.stream().map(x-> new BigDecimal(String.valueOf(x))).reduce(
-//                BigDecimal::multiply).orElse(null);
-//        System.out.println(result3);
-//        long endTime3 = System.currentTimeMillis();
-//
-//        System.out.println("stream: " + (endTime3 - startTime3)+ "\n");
+        long startTime3 = System.currentTimeMillis();
+        BigDecimal result3 = list.stream().map(x -> new BigDecimal(String.valueOf(x))).reduce(
+                BigDecimal::multiply).orElse(null);
+        System.out.println(result3);
+        long endTime3 = System.currentTimeMillis();
+
+        System.out.println("stream: " + (endTime3 - startTime3) + "\n");
 
         long startTime2 = System.currentTimeMillis();
-        BigDecimal result2 = list.stream().parallel().map(x-> new BigDecimal(String.valueOf(x))).reduce(
+        BigDecimal result2 = list.stream().parallel().map(x -> new BigDecimal(String.valueOf(x))).reduce(
                 BigDecimal::multiply).orElse(null);
         System.out.println(result2);
         long endTime2 = System.currentTimeMillis();
@@ -187,7 +186,6 @@ public class MapReduceForkJoin {
         System.out.println("MapReduceForkJoin: " + (endTime - startTime));
 
     }
-
 
 
 }
