@@ -60,6 +60,10 @@ public class WSServer {
     public void startServer() {
         channelFuture = server.bind(WSServerPort);
         logger.info("WSServer start success listen port {}", WSServerPort);
+        channelFuture.addListener(future -> {
+            mainGroup.shutdownGracefully();
+            subGroup.shutdownGracefully();
+        });
     }
 
 /*

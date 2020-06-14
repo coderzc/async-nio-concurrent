@@ -1,14 +1,20 @@
 package com.zc.nettystu.vertx;
 
-import com.zc.nettystu.NettyStuApplication;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class VertxServer {
-    private static final Logger logger = LoggerFactory.getLogger(NettyStuApplication.class);
+    private static final Logger logger = LoggerFactory.getLogger(VertxServer.class);
+
+    @Value("${vertx.port}")
+    private Integer vertxServerPort;
+
     public static Vertx vertx = null;
 
     static {
@@ -17,8 +23,12 @@ public class VertxServer {
 
     public void startServer() {
         vertx.createHttpServer().requestHandler(req -> {
-            String uri = req.absoluteURI();
+            String uri = req.uri();
             logger.info(uri);
-        }).listen(9000);
+            HttpServerResponse response = req.response();
+            response.putHeader("Content-type", "text/html;charset=utf-8");
+            response.end("hello word");
+        }).listen(vertxServerPort);
+        logger.info("VertxServer start success listen port {}", vertxServerPort);
     }
 }

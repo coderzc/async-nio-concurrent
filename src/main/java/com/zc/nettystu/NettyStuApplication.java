@@ -32,9 +32,9 @@ public class NettyStuApplication implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         try {
-//            wsServer.startServer();
-//            nettyServer.startServer();
-//            vertxServer.startServer();
+            wsServer.startServer();
+            nettyServer.startServer();
+            vertxServer.startServer();
         } catch (Exception e) {
             logger.error("NettyBoot error:", e);
         }

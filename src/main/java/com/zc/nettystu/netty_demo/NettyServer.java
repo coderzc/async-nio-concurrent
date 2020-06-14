@@ -73,7 +73,7 @@ public class NettyServer {
                     logger.info("handlerAdded");
                 }
             })
-            .childHandler(new ChannelInitializer<SocketChannel>(){
+            .childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel socketChannel) throws Exception {
                     // 通过SocketChannel获取对应的管道
@@ -81,31 +81,30 @@ public class NettyServer {
 
                     // pipeline 添加handler
                     // 添加http编解码器到pipeline
-                    pipeline.addLast("HttpServerCodec",new HttpServerCodec());
+                    pipeline.addLast("HttpServerCodec", new HttpServerCodec());
 
                     // 添加自定义的handel
-                    pipeline.addLast("CustomHandler",new CustomHandler());
+                    pipeline.addLast("CustomHandler", new CustomHandler());
                 }
             });
 
     /**
      * 启动服务
+     *
      * @throws InterruptedException
      */
     public void startServer() throws InterruptedException {
-        try {
-            // 绑定端口并启动监听 sync 表示以同步方式启动; socket()、bind()、listen() ChannelFuture相当于开启一个线程
-            ChannelFuture channelFuture = serverBootstrap.bind(nettyServerPort).sync();
-            logger.info("NettyServer start success listen port {}", nettyServerPort);
-            // 阻塞。。。。
+        // 绑定端口并启动监听 sync 表示以同步方式启动; socket()、bind()、listen() ChannelFuture相当于开启一个线程
+        ChannelFuture channelFuture = serverBootstrap.bind(nettyServerPort).sync();
+        logger.info("NettyServer start success listen port {}", nettyServerPort);
+        // 阻塞。。。。
 
-            // 用于关闭channel
-            channelFuture.channel().closeFuture().sync();
-        } finally {
+        // 用于关闭channel
+        channelFuture.channel().closeFuture().addListener(future -> {
             // 关闭线程组
             bossGroup.shutdownGracefully();
             workGroup.shutdownGracefully();
-        }
+        });
     }
 
 }
