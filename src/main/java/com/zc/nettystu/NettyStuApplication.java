@@ -2,6 +2,7 @@ package com.zc.nettystu;
 
 import com.zc.nettystu.netty_demo.NettyServer;
 import com.zc.nettystu.netty_webstocket_demo.WSServer;
+import com.zc.nettystu.vertx.VertxServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ public class NettyStuApplication implements ApplicationRunner {
     @Autowired
     private NettyServer nettyServer;
 
+    @Autowired
+    private VertxServer vertxServer;
+
     public static void main(String[] args) {
         SpringApplication.run(NettyStuApplication.class, args);
     }
@@ -28,8 +32,9 @@ public class NettyStuApplication implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         try {
-            wsServer.startServer();
-            nettyServer.startServer();
+//            wsServer.startServer();
+//            nettyServer.startServer();
+//            vertxServer.startServer();
         } catch (Exception e) {
             logger.error("NettyBoot error:", e);
         }
