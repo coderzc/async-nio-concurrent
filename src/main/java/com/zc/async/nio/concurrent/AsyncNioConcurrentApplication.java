@@ -36,7 +36,7 @@ public class AsyncNioConcurrentApplication implements ApplicationRunner {
             nettyServer.startServer();
             vertxServer.startServer();
         } catch (Exception e) {
-            logger.error("NettyBoot error:", e);
+            logger.error("Server Boot error:", e);
         }
     }
 
