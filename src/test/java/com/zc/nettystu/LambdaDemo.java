@@ -4,9 +4,12 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -68,9 +71,9 @@ public class LambdaDemo {
                             System.out.println(Thread.currentThread().getName());
                             return x.stream().max(Integer::compare).orElse(0);
                         })
-                        .reduce(0, (x1,x2)->{
-                            System.out.println("reduce: "+Thread.currentThread().getName());
-                            return Math.max(x1,x2);
+                        .reduce(0, (x1, x2) -> {
+                            System.out.println("reduce: " + Thread.currentThread().getName());
+                            return Math.max(x1, x2);
                         });
         System.out.println(maxMapReduce);
 
@@ -83,8 +86,8 @@ public class LambdaDemo {
         pool.shutdown();
 
         HashMap<String, String> map = new HashMap<>();
-        map.put("a","123");
-        map.put("b","456");
+        map.put("a", "123");
+        map.put("b", "456");
 
         String c = map.putIfAbsent("c", String.valueOf(System.currentTimeMillis()));
         System.out.println(c);
@@ -101,12 +104,12 @@ public class LambdaDemo {
         System.out.println(map);
 
         // 如果k,v 都存在才执行，并返回新值
-        String d2 = map.computeIfPresent("d",(k,v) -> "--");
+        String d2 = map.computeIfPresent("d", (k, v) -> "--");
         System.out.println(d2);
         System.out.println(map);
 
         // mapFunction 返回 null k会被删除
-        String c2 = map.computeIfPresent("c",(k,v) -> null);
+        String c2 = map.computeIfPresent("c", (k, v) -> null);
         System.out.println(c2);
         System.out.println(map);
 
@@ -124,6 +127,23 @@ public class LambdaDemo {
     public static Runnable f1() {
         int i = 1;
         return () -> System.out.println(i);
+    }
+
+    public static <V> Future<V> then(Function<String, V> function) {
+        V apply = function.apply(null);
+        CompletableFuture<V> future = new CompletableFuture<>();
+        future.complete(apply);
+        return future;
+    }
+
+    public static Future<Void> then(Consumer<String> consumer) {
+        consumer.accept(null);
+        return new CompletableFuture<>();
+    }
+
+    public static Future<Void> then(Runnable runnable) {
+        runnable.run();
+        return new CompletableFuture<>();
     }
 
 

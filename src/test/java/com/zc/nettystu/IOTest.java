@@ -8,7 +8,14 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Base64;
+import java.util.UUID;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 /**
  * Created by coderzc on 2019-06-20
@@ -68,7 +75,7 @@ public class IOTest {
         BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
 
         byte[] b = new byte[bufferSize];
-        long readSize =0L;
+        long readSize = 0L;
 
         int bytes;
         while ((bytes = bis.read(b)) != -1) {
@@ -85,7 +92,7 @@ public class IOTest {
 
     @Test // 3s469ms  FileChannel+HeapByteBuffer
     public void testByteBuffer() throws IOException {
-//        FileChannel channel = new FileInputStream(file).getChannel();
+        //        FileChannel channel = new FileInputStream(file).getChannel();
         FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.READ);
 
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
@@ -155,10 +162,10 @@ public class IOTest {
         channel.close();
     }
 
-//    @BitOpt
-//    public void testReadAllByte() throws IOException {
-//        Files.readAllBytes(file.toPath());
-//    }
+    //    @BitOpt
+    //    public void testReadAllByte() throws IOException {
+    //        Files.readAllBytes(file.toPath());
+    //    }
 
 
     @Test
@@ -174,7 +181,7 @@ public class IOTest {
 
         FileChannel fc = raf.getChannel();
 
-//        FileChannel fc = FileChannel.open(file.toPath(), StandardOpenOption.READ);
+        //        FileChannel fc = FileChannel.open(file.toPath(), StandardOpenOption.READ);
 
         long fileSize = fc.size();
 
@@ -213,6 +220,34 @@ public class IOTest {
         fc.close();
         System.out.println("读取总字节数：" + readSize);
 
+    }
+
+    @Test
+    public void testMMapWrite() throws Exception {
+        try (
+                RandomAccessFile raf = new RandomAccessFile(usrHome + "/1.txt", "rw");
+                FileChannel fc = raf.getChannel();
+                //                        FileChannel
+                //                        .open(Paths.get(usrHome + "/1.txt"), StandardOpenOption.READ,
+                //                        StandardOpenOption.WRITE,
+                //                                StandardOpenOption.CREATE)
+        ) {
+            for (int i = 0; i < 2; i++) {
+                // 512m 每次映射的长度
+                long length = 1L << 29;
+                // 映射文件开始的位置
+                long cur = 0L;
+                MappedByteBuffer mappedByteBuffer =
+                        fc.map(MapMode.READ_WRITE, fc.size(), length);
+                while (mappedByteBuffer.hasRemaining()) {
+                    String string = UUID.randomUUID().toString();
+                    string = string + "\n";
+                    byte[] bytes = string.getBytes();
+                    mappedByteBuffer.put(bytes, 0,
+                            Math.min(mappedByteBuffer.limit() - mappedByteBuffer.position(), bytes.length));
+                }
+            }
+        }
     }
 
     @Test
