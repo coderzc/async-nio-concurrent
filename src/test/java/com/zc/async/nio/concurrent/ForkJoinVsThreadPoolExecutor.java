@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.springframework.util.DigestUtils;
 
 /**
- * @author zhaocong <zhaocong@kuaishou.com>
+ * @author coderzc
  * Created on 2020-06-17
  */
 public class ForkJoinVsThreadPoolExecutor {
