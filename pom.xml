@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.zc</groupId>
-    <artifactId>netty-stu</artifactId>
+    <artifactId>async-nio-concurrent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>netty-stu</name>
     <packaging>jar</packaging>
