@@ -1,4 +1,4 @@
-package com.zc.async.nio.concurrent.netty_webstocket_demo;
+package com.zc.async.nio.concurrent.netty_webstocket;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;

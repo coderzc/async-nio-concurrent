@@ -1,4 +1,4 @@
-package com.zc.async.nio.concurrent.netty_demo;
+package com.zc.async.nio.concurrent.netty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

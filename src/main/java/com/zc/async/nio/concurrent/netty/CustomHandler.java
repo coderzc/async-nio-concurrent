@@ -1,4 +1,4 @@
-package com.zc.async.nio.concurrent.netty_demo;
+package com.zc.async.nio.concurrent.netty;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

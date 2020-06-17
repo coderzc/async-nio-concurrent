@@ -1,7 +1,7 @@
 package com.zc.async.nio.concurrent;
 
-import com.zc.async.nio.concurrent.netty_demo.NettyServer;
-import com.zc.async.nio.concurrent.netty_webstocket_demo.WSServer;
+import com.zc.async.nio.concurrent.netty.NettyServer;
+import com.zc.async.nio.concurrent.netty_webstocket.WSServer;
 import com.zc.async.nio.concurrent.vertx.VertxServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +12,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class NettyStuApplication implements ApplicationRunner {
+public class AsyncNioConcurrentApplication implements ApplicationRunner {
 
-    private static final Logger logger = LoggerFactory.getLogger(NettyStuApplication.class);
+    private static final Logger logger = LoggerFactory.getLogger(AsyncNioConcurrentApplication.class);
 
     @Autowired
     private WSServer wsServer;
@@ -26,7 +26,7 @@ public class NettyStuApplication implements ApplicationRunner {
     private VertxServer vertxServer;
 
     public static void main(String[] args) {
-        SpringApplication.run(NettyStuApplication.class, args);
+        SpringApplication.run(AsyncNioConcurrentApplication.class, args);
     }
 
     @Override
