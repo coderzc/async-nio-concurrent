@@ -1,5 +1,5 @@
 # async-nio-concurrent
-Nio、Netty、Socket、高并发、异步、响应式、事件驱动相关
+Nio、Netty、Socket、线程安全、高并发、异步、响应式、事件驱动相关
 
 ## Netty：
 
