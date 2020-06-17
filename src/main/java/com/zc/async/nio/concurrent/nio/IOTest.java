@@ -250,10 +250,4 @@ public class IOTest {
         }
     }
 
-    @Test
-    public void test() {
-        System.out.println("123");
-    }
-
-
 }
