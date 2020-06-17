@@ -11,7 +11,7 @@
     <groupId>com.zc</groupId>
     <artifactId>async-nio-concurrent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>netty-stu</name>
+    <name>async-nio-concurrent</name>
     <packaging>jar</packaging>
     <description>Demo project for Spring Boot</description>
 
