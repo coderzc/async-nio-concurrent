@@ -1,22 +1,23 @@
 package com.zc.async.nio.concurrent.synchronization.atomic;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.zc.async.nio.concurrent.annoation.ThreadSafe;
+import com.zc.async.nio.concurrent.netty.CustomHandler;
 
 /**
  * @author: coderzc
  */
-@Slf4j
 @ThreadSafe
 public class AtomicExample {
-
+    private static final Logger logger = LoggerFactory.getLogger(CustomHandler.class);
     //请求数
     public static int clientTotal = 5000;
 
@@ -47,7 +48,7 @@ public class AtomicExample {
                     add();
                     semaphore.release();
                 } catch (Exception e) {
-                    log.error("exception", e);
+                    logger.error("exception", e);
                 }
                 countDownLatch.countDown();
             });
@@ -55,7 +56,7 @@ public class AtomicExample {
 
         //计数器为零，所有线程执行完成
         countDownLatch.await();
-        log.info("count:{}",count.get());
+        logger.info("count:{}",count.get());
         //释放线程池
         executorService.shutdown();
     }
