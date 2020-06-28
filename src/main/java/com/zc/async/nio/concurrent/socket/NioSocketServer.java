@@ -1,4 +1,4 @@
-package com.zc.async.nio.concurrent.socket_demo;
+package com.zc.async.nio.concurrent.socket;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
