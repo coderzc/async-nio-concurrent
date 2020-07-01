@@ -6,16 +6,16 @@ import static com.zc.async.nio.concurrent.eventloop.EventDrive.Event.TIMER_EVENT
 import static com.zc.async.nio.concurrent.utils.LambdaUtils.catching;
 
 import java.awt.event.KeyEvent;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.vertx.core.impl.ConcurrentHashSet;
 
 /**
  * @author coderzc
@@ -23,7 +23,7 @@ import io.vertx.core.impl.ConcurrentHashSet;
  */
 public class EventDrive {
     private static final Logger logger = LoggerFactory.getLogger(EventDrive.class);
-    private static final Set<Event> eventRegisterSet = new ConcurrentHashSet<>();
+    private static final Set<Event> eventRegisterSet = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private static final BlockingQueue<CallBackEvent> callBackQueue = new LinkedBlockingDeque<>();
 
     static class CallBackEvent<T> extends Event<T> {
