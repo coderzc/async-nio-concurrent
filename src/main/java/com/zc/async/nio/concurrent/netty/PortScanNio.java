@@ -23,10 +23,15 @@ import io.netty.channel.socket.nio.NioSocketChannel;
  */
 public class PortScanNio {
     private static final Logger logger = LoggerFactory.getLogger(PortScanNio.class);
-    private final NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
+    private final NioEventLoopGroup nioEventLoopGroup;
     private final Bootstrap clientBootstrap = new Bootstrap();
 
     public PortScanNio() {
+        this(0);
+    }
+
+    public PortScanNio(int nThread) {
+        nioEventLoopGroup = new NioEventLoopGroup(nThread);
         clientBootstrap.group(nioEventLoopGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)
@@ -77,6 +82,7 @@ public class PortScanNio {
             PortScanNio portScanNio = new PortScanNio();
             Set<Integer> openPorts = portScanNio.scanPort("127.0.0.1", 1, 65535);
             logger.info("openPorts:{}", openPorts);
+            portScanNio.close();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
