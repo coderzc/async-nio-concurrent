@@ -52,16 +52,19 @@ public class PortScanNio {
             CountDownLatch countDownLatch) {
         ChannelFuture channelFuture = clientBootstrap.connect(ip, port);
         channelFuture.addListener(future -> {
-            if (future.isSuccess()) {
-                openPorts.add(port);
-                logger.info("{}:{} is open", ip, port);
-            } else {
-                // 如果发生错误，则访问描述原因的Throwable
-                //                Throwable cause = future.cause();
-                //                cause.printStackTrace();
+            try {
+                if (future.isSuccess()) {
+                    openPorts.add(port);
+                    logger.info("{}:{} is open", ip, port);
+                } else {
+                    // 如果发生错误，则访问描述原因的Throwable
+                    //                Throwable cause = future.cause();
+                    //                cause.printStackTrace();
+                }
+            } finally {
+                countDownLatch.countDown();
+                channelFuture.channel().close().sync();
             }
-            countDownLatch.countDown();
-            channelFuture.channel().close().sync();
         });
     }
 
