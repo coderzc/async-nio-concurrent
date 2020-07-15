@@ -49,13 +49,21 @@ public class PortScanNio {
         for (int i = minPort; i <= maxPort; i++) {
             submitConnect(scanIp, i, openPorts, countDownLatch);
         }
-        countDownLatch.await(10, TimeUnit.MINUTES);
+        // 这里的20分钟是个不安全值，如果外部使用大量多线程则这里应该调大点
+        countDownLatch.await(20, TimeUnit.MINUTES);
         return openPorts;
     }
 
     public void submitConnect(String ip, Integer port, Set<Integer> openPorts,
             CountDownLatch countDownLatch) {
         ChannelFuture channelFuture = clientBootstrap.connect(ip, port);
+        channelFuture.channel().config().setConnectTimeoutMillis(1000);
+        if (channelFuture.isDone() && channelFuture.isSuccess()) {
+            openPorts.add(port);
+            channelFuture.channel().close();
+            countDownLatch.countDown();
+            return;
+        }
         channelFuture.addListener(future -> {
             try {
                 if (future.isSuccess()) {
@@ -67,8 +75,8 @@ public class PortScanNio {
                     //                cause.printStackTrace();
                 }
             } finally {
+                channelFuture.channel().close();
                 countDownLatch.countDown();
-                channelFuture.channel().close().sync();
             }
         });
     }
