@@ -35,10 +35,10 @@ public class PortScanNio {
         clientBootstrap.group(nioEventLoopGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)
+                //                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
-                        // System.out.println(String.format("%s:%s channel init", ip, port));
                     }
                 });
     }
@@ -49,7 +49,16 @@ public class PortScanNio {
         for (int i = minPort; i <= maxPort; i++) {
             submitConnect(scanIp, i, openPorts, countDownLatch);
         }
-        // 这里的20分钟是个不安全值，如果外部使用大量多线程则这里应该调大点
+        countDownLatch.await(20, TimeUnit.MINUTES);
+        return openPorts;
+    }
+
+    public Set<Integer> scanPort(String scanIp, Set<Integer> portSet) throws InterruptedException {
+        Set<Integer> openPorts = Sets.newConcurrentHashSet();
+        CountDownLatch countDownLatch = new CountDownLatch(portSet.size());
+        for (Integer port : portSet) {
+            submitConnect(scanIp, port, openPorts, countDownLatch);
+        }
         countDownLatch.await(20, TimeUnit.MINUTES);
         return openPorts;
     }
@@ -57,7 +66,7 @@ public class PortScanNio {
     public void submitConnect(String ip, Integer port, Set<Integer> openPorts,
             CountDownLatch countDownLatch) {
         ChannelFuture channelFuture = clientBootstrap.connect(ip, port);
-        channelFuture.channel().config().setConnectTimeoutMillis(1000);
+        channelFuture.channel().config().setConnectTimeoutMillis(1500);
         if (channelFuture.isDone() && channelFuture.isSuccess()) {
             openPorts.add(port);
             channelFuture.channel().close();
@@ -69,12 +78,12 @@ public class PortScanNio {
                 if (future.isSuccess()) {
                     openPorts.add(port);
                     logger.info("{}:{} is open", ip, port);
-                } else {
-                    // 如果发生错误，则访问描述原因的Throwable
-                    //                Throwable cause = future.cause();
-                    //                cause.printStackTrace();
                 }
-            } finally {
+            } catch (Exception e){
+                // 如果发生错误，则访问描述原因的Throwable
+                //                Throwable cause = future.cause();
+                //                cause.printStackTrace();
+            }finally {
                 channelFuture.channel().close();
                 countDownLatch.countDown();
             }
