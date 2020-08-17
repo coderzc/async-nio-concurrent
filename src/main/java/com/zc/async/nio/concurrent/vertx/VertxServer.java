@@ -1,5 +1,6 @@
 package com.zc.async.nio.concurrent.vertx;
 
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import org.slf4j.Logger;
@@ -29,5 +30,11 @@ public class VertxServer {
             response.end("hello word");
         }).listen(vertxServerPort);
         logger.info("VertxServer start success listen port {}", vertxServerPort);
+    }
+
+    public void timer(){
+        vertx.setTimer(1000, timerId -> {
+            System.out.println("当前定时器id是: " + timerId);
+        });
     }
 }
