@@ -2,22 +2,26 @@ package com.zc.async.nio.concurrent.lamdba;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.google.common.collect.Lists;
+import org.junit.Test;
 
-import io.netty.util.internal.StringUtil;
+import com.google.common.collect.Lists;
 
 /**
  * @author coderzc
@@ -108,6 +112,11 @@ public class LambdaDemo {
         System.out.println(d2);
         System.out.println(map);
 
+        // 如果 v 不存在直接put新的值，如果存在则put 表达式的值，并返回新的值 (返回 null k会被删除)
+        String d3 = map.merge("d", "1", String::concat);
+        System.out.println(d3);
+        System.out.println(map);
+
         // mapFunction 返回 null k会被删除
         String c2 = map.computeIfPresent("c", (k, v) -> null);
         System.out.println(c2);
@@ -146,5 +155,40 @@ public class LambdaDemo {
         return new CompletableFuture<>();
     }
 
+    /**
+     * 实现类似 python 计数器的功能，怎么写最简洁
+     * python 代码：
+     * from collections import Counter
+     * colors = ['red', 'blue', 'red', 'green', 'blue', 'blue']
+     * c = Counter(colors)
+     * print (dict(c))
+     * {'red': 2, 'blue': 3, 'green': 1}
+     */
+    @Test
+    public void counter() {
+        String[] arr = {"red", "blue", "red", "green", "blue", "blue"};
+
+        // stream 版
+        Map<Object, Long> counter =
+                Arrays.stream(arr).collect(Collectors.groupingBy(String::toString, Collectors
+                        .counting()));
+        System.out.println(counter);
+
+        // map merge 版 (最简洁，写算法题推荐)
+        Map<Object, Long> cnt = new HashMap<>();
+        Arrays.stream(arr).forEach(item -> cnt.merge(item, 1L, Long::sum));
+        System.out.println(cnt);
+
+        // map compute 版
+        Map<Object, Long> cnt2 = new HashMap<>();
+        Arrays.stream(arr).forEach(item -> cnt2.compute(item, (k, v) -> v == null ? 1 : v + 1));
+        System.out.println(cnt2);
+
+        // 线程安全版
+        Map<Object, AtomicLong> concnt = new ConcurrentHashMap<>();
+        Arrays.stream(arr).forEach(item -> concnt.computeIfAbsent(item, k -> new AtomicLong(0)).incrementAndGet());
+
+        System.out.println(concnt);
+    }
 
 }
