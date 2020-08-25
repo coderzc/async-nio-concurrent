@@ -7,7 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author zhaocong <zhaocong@kuaishou.com>
+ * @author coderzc
  * Created on 2020-08-06
  */
 public class TimerDemo {
