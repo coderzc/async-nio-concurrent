@@ -5,7 +5,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ public class ListenableFutureDemo {
         ListenableFuture<String> future = service.submit(() -> UUID.randomUUID().toString());
         Futures.addCallback(future, new FutureCallback<String>() {
             @Override
-            public void onSuccess(@NullableDecl String s) {
+            public void onSuccess(@Nullable String s) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
