@@ -48,8 +48,8 @@ public class ScriptUtils {
         return null;
     }
 
-    public static Object compiler(Script script, Map<String, Object> params, Object[] args) {
-        GroovyObject groovyObject = GROOVY_CACHE.computeIfAbsent(script.getCode(), k -> getGroovyObject(script));
+    public static Object compilerEvaluate(Script script, Map<String, Object> params, Object[] args) {
+        GroovyObject groovyObject = GROOVY_CACHE.computeIfAbsent(script.getCode(), (k) -> getGroovyObject(script));
         if (groovyObject == null) {
             return null;
         }
@@ -106,13 +106,20 @@ public class ScriptUtils {
 
     public static void main(String[] args) throws InterruptedException {
         // 加载并编译脚本
-        loadScript();
+        new Thread(() -> {
+            try {
+                loadScript();
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
 
         while (true) {
             Script script = new Script("FUNCTIONS");
             //        script.setName("sayHello");
             //        Object result = compiler(script, Map.of("titile",""), new Object[] {"coderzc", 25});
-            Object result = compiler(script, Map.of("text", "hello groovy!"), null);
+            Object result = compilerEvaluate(script, Map.of("text", "hello groovy!"), null);
             System.out.println(result);
 
             Thread.sleep(5000);

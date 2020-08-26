@@ -7,12 +7,14 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.zc.async.nio.concurrent.netty.NettyServer;
 import com.zc.async.nio.concurrent.netty_webstocket.WSServer;
 import com.zc.async.nio.concurrent.vertx.VertxServer;
 
 @SpringBootApplication
+@EnableScheduling
 public class AsyncNioConcurrentApplication implements ApplicationRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncNioConcurrentApplication.class);
