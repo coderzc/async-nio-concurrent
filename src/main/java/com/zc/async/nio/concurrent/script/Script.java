@@ -28,10 +28,6 @@ public class Script {
 
     private Serializable compiledContent;
 
-    public Script() {
-
-    }
-
     public Script(String code) {
         this.code = code;
     }
