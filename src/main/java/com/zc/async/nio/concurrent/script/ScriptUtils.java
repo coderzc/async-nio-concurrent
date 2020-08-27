@@ -20,8 +20,6 @@ import javax.script.ScriptEngineManager;
 
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.mvel2.MVEL;
-import org.mvel2.compiler.CompiledExpression;
-import org.mvel2.compiler.ExpressionCompiler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -48,6 +46,7 @@ public class ScriptUtils {
     private static final Logger logger = LoggerFactory.getLogger(ScriptUtils.class);
     private static final GroovyClassLoader loader;
     private static final ScriptEngine engine;
+    private static final ScriptEngine mvelEngine;
 
     static {
         CompilerConfiguration config = new CompilerConfiguration();
@@ -55,7 +54,15 @@ public class ScriptUtils {
         loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader(), config);
 
         ScriptEngineManager manager = new ScriptEngineManager();
+
+        // groovy 有状态
         engine = manager.getEngineByName("groovy");
+        Bindings bindings = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
+        bindings.put("cnt", 1);
+        engine.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
+
+        // mvel 无状态
+        mvelEngine = manager.getEngineByName("mvel");
     }
 
     // 解释执行 (性能低)
@@ -67,27 +74,26 @@ public class ScriptUtils {
             StaticScriptSource scriptSource = new StaticScriptSource(script.getContent());
             GroovyScriptEvaluator evaluator = new GroovyScriptEvaluator();
             return evaluator.evaluate(scriptSource, params);
+        } else if (TYPE_MVEL.equals(script.getType())) {
+            return MVEL.eval(script.getContent(), params);
         }
         return null;
     }
 
     // 执行编译后的脚本
-    public static Object compilerEvaluate(String code, Map<String, Object> params, String funcName, Object[] args)
+    public static Object compilerEvaluate(String code, Map<String, Object> params)
             throws Exception {
         Script script = SCRIPT_CACHE.get(code);
         if (script == null) {
             return null;
         }
         synchronized (ScriptUtils.class) {
-            if (TYPE_GROOVY.equals(script.getType())) {
+            if (TYPE_GROOVY.equals(script.getType()) || TYPE_MVEL.equals(script.getType())) {
                 Bindings bindings = script.getCompiledScript().getEngine().getBindings(ScriptContext.ENGINE_SCOPE);
                 if (params != null) {
                     params.forEach(bindings::put);
                 }
                 return script.getCompiledScript().eval(bindings);
-            } else if (TYPE_MVEL.equals(script.getType())) {
-                CompiledExpression compiledExpression = script.getCompiledExpression();
-                return MVEL.executeExpression(compiledExpression, params);
             } else {
                 throw new Exception("不支持脚本类型," + script.getType());
             }
@@ -123,10 +129,14 @@ public class ScriptUtils {
 
     // 编译mvel脚本
     private static Script compilerMvel(Script script) {
-        ExpressionCompiler compiler = new ExpressionCompiler(script.getContent());
-        CompiledExpression exp = compiler.compile();
-        script.setCompiledExpression(exp);
-        return exp == null ? null : script;
+        try {
+            CompiledScript compile = ((Compilable) mvelEngine).compile(script.getContent());
+            script.setCompiledScript(compile);
+            return compile == null ? null : script;
+        } catch (Exception e) {
+            logger.error("groovy compilerMvel exception:", e);
+            return null;
+        }
     }
 
     //加载脚本源码
@@ -142,7 +152,7 @@ public class ScriptUtils {
                 scriptMap.put(script.getCode(), script);
 
                 Script script2 = new Script("FUNCTIONS2");
-                script2.setType(TYPE_GROOVY);
+                script2.setType(TYPE_MVEL);
                 script2.setContent("return 'hi~,'+text+' cnt:'+cnt");
                 scriptMap.put(script2.getCode(), script2);
             } catch (Exception e) {
@@ -184,10 +194,10 @@ public class ScriptUtils {
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
         scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                Object result = compilerEvaluate("FUNCTIONS", Map.of("text", "hello groovy!", "cnt", 1), null, null);
+                Object result = compilerEvaluate("FUNCTIONS", Map.of("text", "hello groovy!"));
                 logger.info("result:{}", result);
 
-                Object result2 = compilerEvaluate("FUNCTIONS2", Map.of("text", "hello mvel!", "cnt", 999), null, null);
+                Object result2 = compilerEvaluate("FUNCTIONS2", Map.of("text", "hello mvel!", "cnt", 999));
                 logger.info("result:{}", result2);
             } catch (Exception e) {
                 e.printStackTrace();

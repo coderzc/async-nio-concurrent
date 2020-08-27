@@ -11,5 +11,4 @@ static def sayHello(name, age) {
 }
 
 //println("delegate: $delegate")
-println(cnt++)
-return StringUtils.isBlank(text) ? '空' : "hi~, $text"
+return StringUtils.isBlank(text) ? '空' : "hi~, $text" + " cnt:${cnt++}"
