@@ -160,9 +160,11 @@ public class ScriptUtils {
         scriptMap.forEach((k, v) -> SCRIPT_CACHE.compute(k, (k0, v0) -> {
             Script script;
             if (TYPE_GROOVY.equals(v.getType())) {
-                script = compilerGroovy(v);
+                script = v.getContent().equals(v0 == null ? null : v0.getContent()) ? v0
+                                                                                    : compilerGroovy(v);
             } else if (TYPE_MVEL.equals(v.getType())) {
-                script = compilerMvel(v);
+                script = v.getContent().equals(v0 == null ? null : v0.getContent()) ? v0
+                                                                                    : compilerMvel(v);
             } else {
                 return v0;
             }
