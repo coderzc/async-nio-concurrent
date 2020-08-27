@@ -127,7 +127,7 @@ public class ScriptUtils {
         }
     }
 
-    // 编译mvel脚本
+    // 编译mvel脚本 (JSR 223)
     private static Script compilerMvel(Script script) {
         try {
             CompiledScript compile = ((Compilable) mvelEngine).compile(script.getContent());
