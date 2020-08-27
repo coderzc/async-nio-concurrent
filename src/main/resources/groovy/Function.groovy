@@ -3,12 +3,13 @@ package groovy
 import org.apache.commons.lang3.StringUtils
 
 /**
- * @author zhaocong <zhaocong@kuaishou.com>
- * Created on 2020-08-26
+ * @author coderzc* Created on 2020-08-26
  */
 
 static def sayHello(name, age) {
     return "Hello,I am $name,age $age";
 }
 
+//println("delegate: $delegate")
+println(cnt++)
 return StringUtils.isBlank(text) ? '空' : "hi~, $text"
