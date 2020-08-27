@@ -3,6 +3,10 @@ package com.zc.async.nio.concurrent.script;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.script.CompiledScript;
+
+import org.mvel2.compiler.CompiledExpression;
+
 /**
  * @author coderzc
  * Created on 2020-08-26
@@ -26,7 +30,9 @@ public class Script {
 
     private String content;
 
-    private Serializable compiledContent;
+    private CompiledExpression compiledExpression;
+
+    private CompiledScript compiledScript;
 
     public Script(String code) {
         this.code = code;
@@ -104,11 +110,19 @@ public class Script {
         this.content = content == null ? null : content.trim();
     }
 
-    public Serializable getCompiledContent() {
-        return compiledContent;
+    public CompiledExpression getCompiledExpression() {
+        return compiledExpression;
     }
 
-    public void setCompiledContent(Serializable compiledContent) {
-        this.compiledContent = compiledContent;
+    public void setCompiledExpression(CompiledExpression compiledExpression) {
+        this.compiledExpression = compiledExpression;
+    }
+
+    public CompiledScript getCompiledScript() {
+        return compiledScript;
+    }
+
+    public void setCompiledScript(CompiledScript compiledScript) {
+        this.compiledScript = compiledScript;
     }
 }

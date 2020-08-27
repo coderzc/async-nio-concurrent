@@ -5,16 +5,23 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import org.apache.commons.lang3.StringUtils;
+import javax.script.Bindings;
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
 import org.codehaus.groovy.control.CompilerConfiguration;
+import org.mvel2.MVEL;
+import org.mvel2.compiler.CompiledExpression;
+import org.mvel2.compiler.ExpressionCompiler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -37,15 +44,18 @@ public class ScriptUtils {
     public static final String TYPE_GROOVY = "groovy";
     public static final String TYPE_MVEL = "mvel";
 
-    public static final String GROOVY_COMMON_IMPORTS = "groovyCommonImports";
-    public static final Map<String, GroovyObject> GROOVY_CACHE = new ConcurrentHashMap<>();
+    public static final Map<String, Script> SCRIPT_CACHE = new ConcurrentHashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(ScriptUtils.class);
     private static final GroovyClassLoader loader;
+    private static final ScriptEngine engine;
 
     static {
         CompilerConfiguration config = new CompilerConfiguration();
         config.setSourceEncoding("UTF-8");
         loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader(), config);
+
+        ScriptEngineManager manager = new ScriptEngineManager();
+        engine = manager.getEngineByName("groovy");
     }
 
     // 解释执行 (性能低)
@@ -57,37 +67,35 @@ public class ScriptUtils {
             StaticScriptSource scriptSource = new StaticScriptSource(script.getContent());
             GroovyScriptEvaluator evaluator = new GroovyScriptEvaluator();
             return evaluator.evaluate(scriptSource, params);
-        } else if (TYPE_MVEL.equals(script.getType())) {
-            //            return MvelUtil.execute(script.getCompiledContent(), context);
         }
         return null;
     }
 
     // 执行编译后的脚本
-    public static Object compilerEvaluate(String code, Map<String, Object> params, String funcName, Object[] args) {
-        GroovyObject groovyObject = GROOVY_CACHE.computeIfAbsent(code, (k) -> {
-            Map<String, Script> scriptMap = getScriptMap().get();
-            Script script0 = scriptMap.get(code);
-            if (script0 == null || script0.getContent() == null) {
-                return null;
-            }
-            return compilerGroovy(script0);
-        });
-        if (groovyObject == null) {
+    public static Object compilerEvaluate(String code, Map<String, Object> params, String funcName, Object[] args)
+            throws Exception {
+        Script script = SCRIPT_CACHE.get(code);
+        if (script == null) {
             return null;
         }
-
         synchronized (ScriptUtils.class) {
-            if (params != null) {
-                params.forEach(groovyObject::setProperty);
-                groovyObject.setProperty("propertyKeySet", params.keySet());
+            if (TYPE_GROOVY.equals(script.getType())) {
+                Bindings bindings = script.getCompiledScript().getEngine().getBindings(ScriptContext.ENGINE_SCOPE);
+                if (params != null) {
+                    params.forEach(bindings::put);
+                }
+                return script.getCompiledScript().eval(bindings);
+            } else if (TYPE_MVEL.equals(script.getType())) {
+                CompiledExpression compiledExpression = script.getCompiledExpression();
+                return MVEL.executeExpression(compiledExpression, params);
+            } else {
+                throw new Exception("不支持脚本类型," + script.getType());
             }
-            return groovyObject.invokeMethod(StringUtils.isBlank(funcName) ? "run" : funcName, args);
         }
     }
 
     // 编译groovy脚本
-    private static GroovyObject compilerGroovy(Script script) {
+    private static GroovyObject compilerClassGroovy(Script script) {
         try {
             Class<GroovyObject> groovyClass = (Class<GroovyObject>) loader.parseClass(script.getContent());
             return groovyClass.getDeclaredConstructor().newInstance();
@@ -101,17 +109,42 @@ public class ScriptUtils {
         }
     }
 
+    // 编译groovy脚本 (JSR 223)
+    private static Script compilerGroovy(Script script) {
+        try {
+            CompiledScript compile = ((Compilable) engine).compile(script.getContent());
+            script.setCompiledScript(compile);
+            return compile == null ? null : script;
+        } catch (Exception e) {
+            logger.error("groovy compilerGroovy exception:", e);
+            return null;
+        }
+    }
+
+    // 编译mvel脚本
+    private static Script compilerMvel(Script script) {
+        ExpressionCompiler compiler = new ExpressionCompiler(script.getContent());
+        CompiledExpression exp = compiler.compile();
+        script.setCompiledExpression(exp);
+        return exp == null ? null : script;
+    }
+
     //加载脚本源码
     private static Supplier<Map<String, Script>> getScriptMap() {
         return () -> {
             Map<String, Script> scriptMap = new HashMap<>();
             try {
                 String content = Files.readString(Paths.get(
-                        "/Users/zc/IdeaProjects/async-nio-concurrent/src/main/resources/groovy/Function.groovy"));
+                        "/Users/zhaocong/IdeaProjects/async-nio-concurrent/src/main/resources/groovy/Function.groovy"));
                 Script script = new Script("FUNCTIONS");
                 script.setType(TYPE_GROOVY);
                 script.setContent(content);
                 scriptMap.put(script.getCode(), script);
+
+                Script script2 = new Script("FUNCTIONS2");
+                script2.setType(TYPE_GROOVY);
+                script2.setContent("return 'hi~,'+text+' cnt:'+cnt");
+                scriptMap.put(script2.getCode(), script2);
             } catch (Exception e) {
                 logger.error("groovy getScriptMap exception:", e);
             }
@@ -120,26 +153,23 @@ public class ScriptUtils {
         };
     }
 
-    // 一分钟加载一次
-    @Scheduled(fixedDelay = 1000)
+    // 3s加载一次
+    @Scheduled(fixedDelay = 3000)
     public static void loadAndCompilerScript() {
         Map<String, Script> scriptMap = getScriptMap().get();
-        scriptMap.forEach((k, v) -> GROOVY_CACHE.compute(k, (k0, v0) -> {
-            GroovyObject groovyObject = compilerGroovy(v);
-            if (groovyObject == null) {
+        scriptMap.forEach((k, v) -> SCRIPT_CACHE.compute(k, (k0, v0) -> {
+            Script script;
+            if (TYPE_GROOVY.equals(v.getType())) {
+                script = compilerGroovy(v);
+            } else if (TYPE_MVEL.equals(v.getType())) {
+                script = compilerMvel(v);
+            } else {
                 return v0;
             }
-//            synchronized (ScriptUtils.class) {
-//                if (v0 != null) {
-//                    Set<String> propertyKeySet = (Set<String>) v0.getProperty("propertyKeySet");
-//                    if (propertyKeySet != null) {
-//                        propertyKeySet.forEach(property -> {
-//                            groovyObject.setProperty(property, v0.getProperty(property));
-//                        });
-//                    }
-//                }
-//            }
-            return groovyObject;
+            if (script == null) {
+                return v0;
+            }
+            return script;
         }));
     }
 
@@ -154,6 +184,9 @@ public class ScriptUtils {
             try {
                 Object result = compilerEvaluate("FUNCTIONS", Map.of("text", "hello groovy!", "cnt", 1), null, null);
                 logger.info("result:{}", result);
+
+                Object result2 = compilerEvaluate("FUNCTIONS2", Map.of("text", "hello mvel!", "cnt", 999), null, null);
+                logger.info("result:{}", result2);
             } catch (Exception e) {
                 e.printStackTrace();
             }
