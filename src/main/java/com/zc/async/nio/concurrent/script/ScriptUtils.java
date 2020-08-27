@@ -130,7 +130,7 @@ public class ScriptUtils {
     }
 
     //加载脚本源码
-    private static Supplier<Map<String, Script>> getScriptMap() {
+    public static Supplier<Map<String, Script>> getScriptSourceMap() {
         return () -> {
             Map<String, Script> scriptMap = new HashMap<>();
             try {
@@ -156,7 +156,7 @@ public class ScriptUtils {
     // 3s加载一次
     @Scheduled(fixedDelay = 3000)
     public static void loadAndCompilerScript() {
-        Map<String, Script> scriptMap = getScriptMap().get();
+        Map<String, Script> scriptMap = getScriptSourceMap().get();
         scriptMap.forEach((k, v) -> SCRIPT_CACHE.compute(k, (k0, v0) -> {
             Script script;
             if (TYPE_GROOVY.equals(v.getType())) {
