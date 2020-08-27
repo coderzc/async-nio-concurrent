@@ -87,16 +87,14 @@ public class ScriptUtils {
         if (script == null) {
             return null;
         }
-        synchronized (ScriptUtils.class) {
-            if (TYPE_GROOVY.equals(script.getType()) || TYPE_MVEL.equals(script.getType())) {
-                Bindings bindings = script.getCompiledScript().getEngine().getBindings(ScriptContext.ENGINE_SCOPE);
-                if (params != null) {
-                    params.forEach(bindings::put);
-                }
-                return script.getCompiledScript().eval(bindings);
-            } else {
-                throw new Exception("不支持脚本类型," + script.getType());
+        if (TYPE_GROOVY.equals(script.getType()) || TYPE_MVEL.equals(script.getType())) {
+            Bindings bindings = script.getCompiledScript().getEngine().createBindings();
+            if (params != null) {
+                params.forEach(bindings::put);
             }
+            return script.getCompiledScript().eval(bindings);
+        } else {
+            throw new Exception("不支持脚本类型," + script.getType());
         }
     }
 
