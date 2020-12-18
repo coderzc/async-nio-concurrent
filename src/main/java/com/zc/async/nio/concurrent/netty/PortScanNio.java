@@ -13,6 +13,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -35,6 +36,7 @@ public class PortScanNio {
         clientBootstrap.group(nioEventLoopGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)
+                .option(ChannelOption.TCP_NODELAY, true)
                 //                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
