@@ -143,7 +143,7 @@ public class ScriptUtils {
             Map<String, Script> scriptMap = new HashMap<>();
             try {
                 String content = Files.readString(Paths.get(
-                        "/Users/zhaocong/IdeaProjects/async-nio-concurrent/src/main/resources/groovy/Function.groovy"));
+                        "/Users/zc/IdeaProjects/async-nio-concurrent/src/main/resources/groovy/Function.groovy"));
                 Script script = new Script("FUNCTIONS");
                 script.setType(TYPE_GROOVY);
                 script.setContent(content);

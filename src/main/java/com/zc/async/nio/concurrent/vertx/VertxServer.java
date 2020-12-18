@@ -15,7 +15,7 @@ public class VertxServer {
     @Value("${vertx.port}")
     private Integer vertxServerPort;
 
-    public static Vertx vertx = null;
+    public static Vertx vertx;
 
     static {
         vertx = Vertx.vertx();
