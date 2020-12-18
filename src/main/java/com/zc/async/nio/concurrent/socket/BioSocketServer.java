@@ -55,13 +55,13 @@ public class BioSocketServer {
                         //遇到两个回车就输出代表这条消息完成
                         if ((i = message.indexOf("\n")) > -1) {
                             messageStr = message.substring(0, i);
-                            blockingQueue.offer(messageStr);
+                            blockingQueue.put(messageStr);
                         }
                     }
 
                     System.out.println("读缓冲区被关闭：" + socket);
 
-                } catch (IOException e) {
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 } finally {
                     try {
@@ -82,7 +82,7 @@ public class BioSocketServer {
                     BufferedOutputStream bos = new BufferedOutputStream(outputStream);
 
                     while (true) {
-                        String messageStr = blockingQueue.poll();
+                        String messageStr = blockingQueue.take();
                         if (socketAlive(socket)) {
                             System.out.format("\nfrom socket ip：%s，port:%s ,message：%s\n",
                                     socket.getInetAddress().getHostAddress(), socket.getPort(),
