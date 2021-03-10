@@ -1,9 +1,13 @@
 package com.zc.async.nio.concurrent.netty;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.zc.async.nio.concurrent.utils.IOMode;
+import com.zc.async.nio.concurrent.utils.NettyUtils;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -13,9 +17,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpServerCodec;
 
 /**
@@ -23,18 +25,27 @@ import io.netty.handler.codec.http.HttpServerCodec;
  */
 @Service
 public class NettyServer {
-    private static final Logger logger = LoggerFactory.getLogger(NettyServer.class);
+    private static final Logger logger = getLogger(NettyServer.class);
+
+    private final static String BOSS_THREAD_PREFIX = "my-netty-boss";
+    private final static String WORKER_THREAD_PREFIX = "my-netty-worker";
+    private final static int BOSS_THREAD_NUM = 10;
+    private final static int WORKER_THREAD_NUM = 10;
+    private static final IOMode ioMode = IOMode.valueOf("NIO");
 
     @Value("${netty.port}")
     private Integer nettyServerPort;
-
     /**
      * 定义一对线程组
      */
     // 主线程组，用于接受来自客户端的连接，但不做任何处理，和老板一样 ---> Acceptor
-    EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+    EventLoopGroup bossGroup = NettyUtils.createEventLoop(ioMode,
+                                                          BOSS_THREAD_NUM,
+                                                          BOSS_THREAD_PREFIX);
     // 从线程组，处理来自主线程组的任务 ----> reactor
-    EventLoopGroup workGroup = new NioEventLoopGroup(10);
+    EventLoopGroup workGroup = NettyUtils.createEventLoop(ioMode,
+                                                          WORKER_THREAD_NUM,
+                                                          WORKER_THREAD_PREFIX);
     /**
      * 1. 创建一个线程执行器
      * new ThreadPerTaskExecutor(newDefaultThreadFactory());
@@ -51,29 +62,38 @@ public class NettyServer {
      */
     ServerBootstrap serverBootstrap = new ServerBootstrap()
             .group(bossGroup, workGroup)
-            .channel(NioServerSocketChannel.class)
-            .option(ChannelOption.SO_BACKLOG, 128) //配置ServerSocketChannel 参数 SO_BACKLOG--->accept就绪队列大小
-            .childOption(ChannelOption.TCP_NODELAY, true) //配置SocketChannel 参数 TCP_NODELAY--->true 关闭nagle算法
+            .channel(NettyUtils.getServerChannelClass(ioMode))
+            //配置ServerSocketChannel 参数 SO_BACKLOG--->accept就绪队列大小
+            .option(ChannelOption.SO_BACKLOG,
+                    128)
+            //配置SocketChannel 参数 TCP_NODELAY--->true
+            .childOption(ChannelOption.TCP_NODELAY,
+                         true)
+            // 关闭nagle算法
             .childOption(ChannelOption.SO_KEEPALIVE, true)
             .handler(new ChannelInboundHandlerAdapter() {
                 @Override
-                public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+                public void channelRegistered(ChannelHandlerContext ctx)
+                        throws Exception {
                     logger.info("channelRegistered");
                 }
 
                 @Override
-                public void channelActive(ChannelHandlerContext ctx) throws Exception {
+                public void channelActive(ChannelHandlerContext ctx)
+                        throws Exception {
                     logger.info("channelActive");
                 }
 
                 @Override
-                public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+                public void handlerAdded(ChannelHandlerContext ctx)
+                        throws Exception {
                     logger.info("handlerAdded");
                 }
             })
             .childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
-                protected void initChannel(SocketChannel socketChannel) throws Exception {
+                protected void initChannel(SocketChannel socketChannel)
+                        throws Exception {
                     // 通过SocketChannel获取对应的管道
                     ChannelPipeline pipeline = socketChannel.pipeline();
 
@@ -92,9 +112,12 @@ public class NettyServer {
      * @throws InterruptedException
      */
     public void startServer() throws InterruptedException {
-        // 绑定端口并启动监听 sync 表示以同步方式启动; socket()、bind()、listen() ChannelFuture相当于开启一个线程
-        ChannelFuture channelFuture = serverBootstrap.bind(nettyServerPort).sync();
-        logger.info("NettyServer start success listen port {}", nettyServerPort);
+        // 绑定端口并启动监听 sync 表示以同步方式启动; socket()、bind()、listen()
+        // ChannelFuture相当于开启一个线程
+        ChannelFuture channelFuture =
+                serverBootstrap.bind(nettyServerPort).sync();
+        logger.info("NettyServer start success listen port {}",
+                    nettyServerPort);
         // 阻塞。。。。
 
         // 用于关闭channel
