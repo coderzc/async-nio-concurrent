@@ -9,13 +9,8 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Base64;
 import java.util.UUID;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 
 /**
  * Created by coderzc on 2019-06-20

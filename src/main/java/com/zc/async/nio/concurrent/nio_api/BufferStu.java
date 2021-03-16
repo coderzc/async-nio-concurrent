@@ -29,7 +29,7 @@ public class BufferStu {
         MappedByteBuffer mappedByteBuffer = fc.map(FileChannel.MapMode.READ_WRITE, 0, 1000);
 
         // transferTo (sendfile)
-        // linux2.4以前：直接在内存中进行拷贝 ；2.4以后DMA直接从原来的内存buffer中读取
+        // linux2.4以前：直接在内核空间中进行拷贝 ；2.4以后DMA直接从原来的内存buffer中读取
         fc.transferTo(0,fc.size(),socketChannel);
 
 

@@ -10,6 +10,7 @@ import com.zc.async.nio.concurrent.utils.IOMode;
 import com.zc.async.nio.concurrent.utils.NettyUtils;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -17,8 +18,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.WriteBufferWaterMark;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.HttpServerCodec;
 
 /**
  * Created by coderzc on 2019-06-12
@@ -62,15 +63,16 @@ public class NettyServer {
      */
     ServerBootstrap serverBootstrap = new ServerBootstrap()
             .group(bossGroup, workGroup)
+            .option(ChannelOption.ALLOCATOR, ByteBufAllocator.DEFAULT)
             .channel(NettyUtils.getServerChannelClass(ioMode))
             //配置ServerSocketChannel 参数 SO_BACKLOG--->accept就绪队列大小
-            .option(ChannelOption.SO_BACKLOG,
-                    128)
-            //配置SocketChannel 参数 TCP_NODELAY--->true
-            .childOption(ChannelOption.TCP_NODELAY,
-                         true)
-            // 关闭nagle算法
+            .option(ChannelOption.SO_BACKLOG, 128)
+            //配置SocketChannel 参数 TCP_NODELAY--->true 关闭nagle算法
+            .childOption(ChannelOption.TCP_NODELAY, true)
             .childOption(ChannelOption.SO_KEEPALIVE, true)
+            .childOption(ChannelOption.ALLOCATOR, ByteBufAllocator.DEFAULT)
+            .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK,
+                         new WriteBufferWaterMark(1, 2))
             .handler(new ChannelInboundHandlerAdapter() {
                 @Override
                 public void channelRegistered(ChannelHandlerContext ctx)
@@ -96,12 +98,13 @@ public class NettyServer {
                         throws Exception {
                     // 通过SocketChannel获取对应的管道
                     ChannelPipeline pipeline = socketChannel.pipeline();
+                    pipeline.addLast("FramHandler",
+                                     new TransportFrameDecoder());
+                     // pipeline 添加handler
+                     // 添加http编解码器到pipeline
+                    //pipeline.addLast("HttpServerCodec", new HttpServerCodec());
 
-                    // pipeline 添加handler
-                    // 添加http编解码器到pipeline
-                    pipeline.addLast("HttpServerCodec", new HttpServerCodec());
-
-                    // 添加自定义的handel
+                     // 添加自定义的handel
                     pipeline.addLast("CustomHandler", new CustomHandler());
                 }
             });

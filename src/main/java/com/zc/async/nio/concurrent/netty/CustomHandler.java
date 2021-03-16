@@ -30,6 +30,12 @@ public class CustomHandler extends SimpleChannelInboundHandler<HttpObject> {
 
             // 显示客户端远程地址
             logger.info("remoteAddress:" + channel.remoteAddress().toString());
+            if(!channel.isWritable()) {
+                System.out.println("11111111111111111");
+            }else {
+                System.out.println("22222222222222222");
+            }
+            Thread.sleep(10000);
 
             // 定义发送数据消息并写入ByteBuf
             ByteBuf content = Unpooled.copiedBuffer("hi io.netty~，你好 😂", CharsetUtil.UTF_8);
