@@ -2,6 +2,11 @@ package com.zc.async.nio.concurrent.netty;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -11,6 +16,7 @@ import com.zc.async.nio.concurrent.utils.NettyUtils;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -20,6 +26,8 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.WriteBufferWaterMark;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 /**
  * Created by coderzc on 2019-06-12
@@ -117,11 +125,7 @@ public class NettyServer {
     public void startServer() throws InterruptedException {
         // 绑定端口并启动监听 sync 表示以同步方式启动; socket()、bind()、listen()
         // ChannelFuture相当于开启一个线程
-        ChannelFuture channelFuture =
-                serverBootstrap.bind(nettyServerPort).sync();
-        logger.info("NettyServer start success listen port {}",
-                    nettyServerPort);
-        // 阻塞。。。。
+        ChannelFuture channelFuture = serverBootstrap.bind(nettyServerPort);
 
         // 用于关闭channel
         channelFuture.channel().closeFuture().addListener(future -> {
@@ -129,6 +133,10 @@ public class NettyServer {
             bossGroup.shutdownGracefully();
             workGroup.shutdownGracefully();
         });
+
+        channelFuture.sync();
+        logger.info("NettyServer start success listen port {}",
+                    nettyServerPort);
     }
 
     /**

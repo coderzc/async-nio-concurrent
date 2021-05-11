@@ -35,8 +35,8 @@ public class AsyncNioConcurrentApplication implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         try {
-            //wsServer.startServer();
-            nettyServer.startServer();
+            wsServer.startServer();
+            //nettyServer.startServer();
             //vertxServer.startServer();
         } catch (Exception e) {
             logger.error("Server Boot error:", e);

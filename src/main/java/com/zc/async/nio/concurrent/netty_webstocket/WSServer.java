@@ -1,5 +1,7 @@
 package com.zc.async.nio.concurrent.netty_webstocket;
 
+import java.net.InetSocketAddress;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
@@ -26,22 +28,6 @@ public class WSServer {
 
     private static final Logger logger = LoggerFactory.getLogger(WSServer.class);
 
-    /*
-    单例模式  TODO spring 默认就是单例子
-     */
-//    private WSServer() {
-//        this.init();
-//    }
-//
-//    private static class WSServerSingleton {
-//        static final WSServer instance = new WSServer();
-//    }
-//
-//    public static WSServer getInstance() {
-//        return WSServerSingleton.instance;
-//    }
-
-
     public WSServer() {
         init();
     }
@@ -58,20 +44,14 @@ public class WSServer {
 
 
     public void startServer() {
-        channelFuture = server.bind(WSServerPort);
-        logger.info("WSServer start success listen port {}", WSServerPort);
-        channelFuture.addListener(future -> {
+        channelFuture = server.bind(
+                new InetSocketAddress("0.0.0.0", WSServerPort));
+        channelFuture.channel().closeFuture().addListener(future -> {
             mainGroup.shutdownGracefully();
             subGroup.shutdownGracefully();
         });
-    }
 
-/*
-spring 帮我们管理bean
- */
-//    public void closeServer() {
-//        this.channelFuture.channel().closeFuture();
-//        this.mainGroup.shutdownGracefully();
-//        this.subGroup.shutdownGracefully();
-//    }
+        channelFuture.syncUninterruptibly();
+        logger.info("WSServer start success listen port {}", WSServerPort);
+    }
 }

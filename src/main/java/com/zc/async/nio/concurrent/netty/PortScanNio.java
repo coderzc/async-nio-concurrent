@@ -36,7 +36,7 @@ public class PortScanNio {
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
-                //                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
@@ -67,7 +67,6 @@ public class PortScanNio {
     public void submitConnect(String ip, Integer port, Set<Integer> openPorts,
             CountDownLatch countDownLatch) {
         ChannelFuture channelFuture = clientBootstrap.connect(ip, port);
-        channelFuture.channel().config().setConnectTimeoutMillis(1500);
         if (channelFuture.isDone() && channelFuture.isSuccess()) {
             openPorts.add(port);
             channelFuture.channel().close();
