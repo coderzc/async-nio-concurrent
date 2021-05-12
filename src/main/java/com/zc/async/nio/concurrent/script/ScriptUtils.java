@@ -1,6 +1,10 @@
 package com.zc.async.nio.concurrent.script;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.script.Bindings;
 import javax.script.Compilable;
@@ -142,8 +147,12 @@ public class ScriptUtils {
         return () -> {
             Map<String, Script> scriptMap = new HashMap<>();
             try {
-                String content = Files.readString(Paths.get(
-                        "/Users/zc/IdeaProjects/async-nio-concurrent/src/main/resources/groovy/Function.groovy"));
+
+                InputStream inputStream = Thread.currentThread()
+                                       .getContextClassLoader()
+                                       .getResourceAsStream("/groovy/Function.groovy");
+                String content = new BufferedReader(new InputStreamReader(inputStream))
+                        .lines().collect(Collectors.joining(System.lineSeparator()));
                 Script script = new Script("FUNCTIONS");
                 script.setType(TYPE_GROOVY);
                 script.setContent(content);
