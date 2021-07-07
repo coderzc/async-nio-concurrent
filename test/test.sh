@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -ev
+
+if [[ $# -ne 1 ]]; then
+    echo "Must pass commit id of hugegraph repo"
+    exit 1
+fi
+
+COMMIT_ID=$1
+HUGEGRAPH_GIT_URL="https://github.com/hugegraph/hugegraph.git"
+
+git clone --depth 100 ${HUGEGRAPH_GIT_URL}
+cd hugegraph
+git checkout ${COMMIT_ID}
+mvn package -DskipTests
+mv hugegraph-*.tar.gz ../
+cd ../
+rm -rf hugegraph
+tar -zxf hugegraph-*.tar.gz
+
+ls -l
+cd hugegraph-*
+ls -l
