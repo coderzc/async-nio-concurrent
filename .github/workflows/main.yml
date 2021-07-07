@@ -21,7 +21,7 @@ jobs:
       with:
         minikube version: v1.21.0
         kubernetes version: v1.20.1
-#       start args: '--extra-config=etcd.initial-advertise-peer-urls=http://0.0.0.0:2580 --extra-config=etcd.listen-peer-urls=http://0.0.0.0:2580 --extra-config=etcd.advertise-client-urls=http://0.0.0.0:2579 --extra-config=etcd.listen-client-urls=http://0.0.0.0:2579 --extra-config=kubelet.cgroup-driver=systemd'
+        start args: '--extra-config=etcd.initial-advertise-peer-urls=http://0.0.0.0:2580 --extra-config=etcd.listen-peer-urls=http://0.0.0.0:2580 --extra-config=etcd.advertise-client-urls=http://0.0.0.0:2579 --extra-config=etcd.listen-client-urls=http://0.0.0.0:2579 --alsologtostderr -v=7'
     - name: Interact with the cluster
       run: kubectl get nodes
 
