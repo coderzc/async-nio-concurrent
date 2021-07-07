@@ -19,9 +19,9 @@ jobs:
     - name: Setup Minikube-Kubernetes
       uses: manusa/actions-setup-minikube@v2.4.2
       with:
-        minikube version: v1.21.0
-        kubernetes version: v1.20.1
-        start args: '--extra-config=etcd.initial-advertise-peer-urls=http://0.0.0.0:2580 --extra-config=etcd.listen-peer-urls=http://0.0.0.0:2580 --extra-config=etcd.advertise-client-urls=http://0.0.0.0:2579 --extra-config=etcd.listen-client-urls=http://0.0.0.0:2579 --alsologtostderr -v=7'
+        minikube version: v1.16.0
+        kubernetes version: v1.19.2
+        start args: '--extra-config=etcd.initial-advertise-peer-urls=http://0.0.0.0:2580 --extra-config=etcd.listen-peer-urls=http://0.0.0.0:2580 --extra-config=etcd.advertise-client-urls=http://0.0.0.0:2579 --extra-config=etcd.listen-client-urls=http://0.0.0.0:2579'
     - name: Interact with the cluster
       run: kubectl get nodes
 
